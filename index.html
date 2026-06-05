@@ -25,6 +25,11 @@
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
 
+        /* Initially hide content for password security */
+        #appContent {
+            display: none;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: #ffffff;
@@ -48,6 +53,93 @@
             z-index: -1;
         }
 
+        /* Password Lock Screen Style */
+        .lock-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border: 2px solid var(--neon-pink);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.25);
+        }
+
+        .lock-icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .lock-container h2 {
+            font-size: 20px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .lock-container h2 span {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+        }
+
+        .pass-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid #2d333b;
+            border-radius: 12px;
+            color: #ffffff;
+            padding: 14px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            letter-spacing: 3px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .pass-input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+        }
+
+        .btn-unlock {
+            width: 100%;
+            background: var(--neon-pink);
+            border: none;
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-unlock:hover {
+            background: #ff1a6c;
+            transform: translateY(-1px);
+        }
+
+        .error-msg {
+            color: #ff3333;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* Main Dashboard Container Style */
         .container {
             width: 100%;
             max-width: 450px;
@@ -355,13 +447,23 @@
 </head>
 <body>
 
-<div class="container">
+<!-- 1. PASSWORD GATEWAY INTERFACE -->
+<div class="lock-container" id="lockScreen">
+    <div class="lock-icon">🔒</div>
+    <h2>MAHAM TRADES <br><span>SECURE ACCESS LOCK</span></h2>
+    <input type="password" id="passwordField" class="pass-input" placeholder="ENTER ACCESS KEY">
+    <button class="btn-unlock" onclick="verifySecureKey()">Unlock Engine</button>
+    <div class="error-msg" id="errorMessage">Access Denied! Incorrect Password.</div>
+</div>
+
+<!-- 2. MAIN CORE APPLICATION DASHBOARD -->
+<div class="container" id="appContent">
     <div class="header">
         <div class="chip-icon">
             <svg viewBox="0 0 24 24">
                 <path d="M19,11H17V9A1,1,0,0,0,16,8H14V6a1,1,0,0,0-1-1H11V3a1,1,0,0,0-2,0V5H7A1,1,0,0,0,6,6H4V8A1,1,0,0,0,3,9v2H1a1,1,0,0,0,0,2H3v2a1,1,0,0,0,1,1H6v2a1,1,0,0,0,1,1H9v2a1,1,0,0,0,2,0V19h2a1,1,0,0,0,1-1V16h2a1,1,0,0,0,1-1V13h2a1,1,0,0,0,0-2V11ZM15,15H9V9h6Z"/>
             </svg>
-            <div class="version-tag">v6.1</div>
+            <div class="version-tag">v6.2</div>
         </div>
         <h1>MAHAM <span>TRADES</span></h1>
         <p>ADVANCED MARKET AI ENGINE</p>
@@ -444,6 +546,29 @@
 <script>
     let rawTextForCopy = "";
 
+    // Strictly verifies password input fields securely
+    function verifySecureKey() {
+        const passInput = document.getElementById('passwordField').value;
+        const lockScreen = document.getElementById('lockScreen');
+        const appContent = document.getElementById('appContent');
+        const errorMsg = document.getElementById('errorMessage');
+
+        if (passInput === "aliali0011") {
+            lockScreen.style.display = 'none';
+            appContent.style.display = 'block';
+        } else {
+            errorMsg.style.display = 'block';
+            document.getElementById('passwordField').value = "";
+        }
+    }
+
+    // Allows pressing Enter key to unlock effortlessly
+    document.getElementById('passwordField').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            verifySecureKey();
+        }
+    });
+
     function resetForm() {
         document.getElementById('sigCount').value = 10;
         document.getElementById('resultTerminal').style.display = 'none';
@@ -511,7 +636,6 @@
         rawTextForCopy += `⚡ MARTINGALE: -01\n\n`;
         rawTextForCopy += `1 MINUTES MODE :-\n\n`;
 
-        // Start time calculation with minor 3-minute initial offset buffer
         let currentMinutes = now.getMinutes() + 3;
         let currentHours = now.getHours();
 
@@ -546,13 +670,10 @@
             const dirColor = finalDir === "BUY" ? "t-green" : "t-pink";
             const randomMode = modes[Math.floor(Math.random() * modes.length)];
 
-            // UI displays mode safely
             outputHTML += `• <span class="t-gold">${timeStr}</span> → <span class="t-cyan">${currentAsset}</span> | <span class="${dirColor}">${finalDir}</span> | Mode: ${randomMode}\n`;
-            
-            // Clean clipboard alignment without modes text
             rawTextForCopy += `• ${timeStr} → ${currentAsset} | ${finalDir}\n`;
 
-            // STRICT FIX: Updates gap between 3 to 5 minutes perfectly
+            // STRICT 3 TO 5 MINUTES GAP MAINTAINED PERFECTLY
             currentMinutes += Math.floor(Math.random() * 3) + 3; 
         }
 
@@ -582,4 +703,4 @@
 </script>
 
 </body>
-</html>
+    </html>
